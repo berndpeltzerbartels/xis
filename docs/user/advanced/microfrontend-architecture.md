@@ -19,7 +19,7 @@ For standalone XIS Boot:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -39,7 +39,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.5.0"
     id "io.spring.dependency-management" version "1.1.7"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -164,7 +164,8 @@ In distributed applications, URLs and strings are usually the better boundary be
 pages and frontlets.
 
 The reason is classpath ownership. If an action in the shell application returns a remote page class, the shell
-application must have that remote application class on its classpath. That couples the applications at Java level. If the
+application must have that remote application class on its classpath. That couples the applications at Java level. If
+the
 action returns a URL string instead, the contract is only the public page URL. The browser resolves that URL to the page
 entry in the merged client config and uses the host that provided that page.
 

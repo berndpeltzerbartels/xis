@@ -21,7 +21,7 @@ Use Groovy 4 or newer:
 plugins {
     id "java"
     id "groovy"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -125,7 +125,8 @@ For Groovy controllers, you can place templates next to the controller under `sr
 resources when the Gradle Groovy plugin is applied.
 
 You normally do not need `@HtmlFile` when the template follows the default name and package location. Use
-`@HtmlFile('GroovyPage.html')` only when you want to name the template explicitly; the file name is then resolved relative
+`@HtmlFile('GroovyPage.html')` only when you want to name the template explicitly; the file name is then resolved
+relative
 to the controller package in both source layouts.
 
 When the Gradle project applies both the Groovy plugin and the XIS plugin, the normal XIS scaffolding tasks also scan
@@ -147,7 +148,8 @@ shape with expressions, repeated blocks, bound forms, validation placeholders, a
 ## XIS Boot
 
 Standalone XIS Boot applications can also use `@XISBootApplication` on a Groovy class. The XIS Gradle plugin enables
-Java annotation processing for Groovy compilation when the Groovy plugin is present, so `xisJar` can generate and package
+Java annotation processing for Groovy compilation when the Groovy plugin is present, so `xisJar` can generate and
+package
 the boot runner.
 
 The resulting jar contains Java classes, Groovy classes, resources, and the generated `one.xis.boot.Runner`.

@@ -16,7 +16,7 @@ Use `xis-boot-native` instead of `xis-boot`:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -40,7 +40,8 @@ A native build needs:
 
 The plugin looks for `native-image` in this order: an explicitly configured GraalVM home (`-PgraalVmHome=...` or
 `--graal-vm-home=...`), `GRAALVM_HOME`, `JAVA_HOME`, `PATH`, and then common local JDK installation directories. It does
-not require a specific GraalVM distribution. If Oracle GraalVM is installed and selected through one of those mechanisms,
+not require a specific GraalVM distribution. If Oracle GraalVM is installed and selected through one of those
+mechanisms,
 the plugin uses it.
 
 Native Image performance depends noticeably on the GraalVM distribution, version, CPU, and build options. In XIS'
@@ -58,7 +59,8 @@ The native plugin tasks are:
 ./gradlew xisNativeSmokeTest
 ```
 
-`xisNativeCompile` builds the executable, `xisNativeRun` starts it locally, and `xisNativeSmokeTest` builds the executable,
+`xisNativeCompile` builds the executable, `xisNativeRun` starts it locally, and `xisNativeSmokeTest` builds the
+executable,
 starts it on a temporary port, verifies that the HTTP server answers, and stops it again.
 
 `xisNativeCompileForHost` builds a second executable optimized for the current build host and passes `-march=native` to
@@ -107,7 +109,8 @@ If an application must be compiled with `xis-boot-native`, write the native appl
 
 ## Database Modules
 
-Native database support is explicit. Add the normal persistence module plus the native driver module for the DBMS used by
+Native database support is explicit. Add the normal persistence module plus the native driver module for the DBMS used
+by
 the application.
 
 This is different from a normal JVM build. On the JVM, a JDBC driver can often be added as `runtimeOnly` and discovered
@@ -163,13 +166,15 @@ dependencies {
 
 ## Component Discovery
 
-Normal XIS Boot can scan the classpath at startup. A native executable cannot rely on the same kind of runtime discovery.
+Normal XIS Boot can scan the classpath at startup. A native executable cannot rely on the same kind of runtime
+discovery.
 For native builds, XIS generates catalogs during the build and starts the context from those catalogs.
 
 This means:
 
 - components, pages, frontlets, modals, includes, repositories, and proxy interfaces must be visible to the build
-- artifacts built as XIS libraries can contribute generated catalogs, so reusable XIS modules can participate in native applications
+- artifacts built as XIS libraries can contribute generated catalogs, so reusable XIS modules can participate in native
+  applications
 - source-level Lombok is not a problem for this mechanism because XIS works with the compiled classes and generated
   catalogs, not with Lombok source transformations at runtime
 
@@ -188,7 +193,8 @@ A native application does not need source access to every library. It only needs
 Gradle classpath, and that artifact must contain the generated XIS catalog resources.
 
 A library that was not built as a native XIS artifact does not automatically contribute XIS components to a native
-application. If such a library only provides ordinary helper classes, that is fine. If it contains XIS components, pages,
+application. If such a library only provides ordinary helper classes, that is fine. If it contains XIS components,
+pages,
 repositories, or other framework-managed classes that should be available in a native executable, build it with the XIS
 plugin and add `xis-boot-native` so the native metadata is part of the jar.
 

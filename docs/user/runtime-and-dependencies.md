@@ -19,7 +19,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -37,7 +37,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -54,7 +54,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -70,7 +70,8 @@ When the XIS Gradle plugin is used, it aligns XIS dependency versions to the plu
 in builds that do not use the plugin.
 
 Use `xis-spring` when the application already uses Spring Boot or needs Spring integration. `xis-spring` also brings the
-plain HTTP-controller API onto the classpath, so Spring applications can expose advanced plain HTTP endpoints next to XIS
+plain HTTP-controller API onto the classpath, so Spring applications can expose advanced plain HTTP endpoints next to
+XIS
 pages when they deliberately need that lower-level API.
 
 Use `xis-boot` when you want a small standalone runtime with XIS dependency injection, properties, package scanning, and
@@ -82,11 +83,14 @@ special case where you deliberately do not use the XIS page/frontend layer and w
 plain HTTP endpoints and your own static resources.
 
 `xis-http-controller` provides `one.xis.http.Controller`, `@Get`, `@Post`, the other HTTP controller annotations, SSE,
-static public resources, and the embedded Netty HTTP runtime. It is intentionally named HTTP rather than REST because XIS
+static public resources, and the embedded Netty HTTP runtime. It is intentionally named HTTP rather than REST because
+XIS
 does not try to define or enforce the full REST architectural style.
 
-This API is still an advanced tool. In a normal XIS application, prefer pages, frontlets, forms, actions, and model data.
-Use plain HTTP controllers for external clients, webhooks, custom static-resource handling, or intentionally framework-light
+This API is still an advanced tool. In a normal XIS application, prefer pages, frontlets, forms, actions, and model
+data.
+Use plain HTTP controllers for external clients, webhooks, custom static-resource handling, or intentionally
+framework-light
 applications such as a small API plus hand-written browser assets.
 
 If this HTTP-controller-only special case should be built as a GraalVM native executable, add
@@ -94,7 +98,8 @@ If this HTTP-controller-only special case should be built as a GraalVM native ex
 native class catalogs part of ordinary HTTP-controller applications.
 
 Use `xis-boot-native` when you want the XIS Boot programming model and want to build a GraalVM native executable for
-small containers, fast startup, and cloud-native deployment. Continue with [Cloud Native And Native Images](cloud-native.md)
+small containers, fast startup, and cloud-native deployment. Continue
+with [Cloud Native And Native Images](cloud-native.md)
 for Gradle examples, native database modules, build requirements, and current limitations.
 
 ## Controller API
@@ -103,21 +108,21 @@ The selected runtime brings the controller annotations into the application.
 
 Important annotations include:
 
-| Annotation | Use |
-| --- | --- |
-| `@Page` | Maps a controller to a page URL. |
-| `@WelcomePage` | Marks the default entry page. |
-| `@Frontlet` | Marks a reusable frontlet controller. |
-| `@Modal` | Marks a modal dialog controller. |
-| `@Include` | Registers a reusable HTML include. |
-| `@ModelData` | Exposes data to a template. |
-| `@FormData` | Provides or receives form-bound data. |
-| `@Action` | Exposes a method to template-triggered interactions. |
-| `@PathVariable` | Binds a value from the current page URL. |
-| `@QueryParameter` | Binds a query parameter from the current page URL. |
-| `@ActionParameter` | Binds a parameter sent by the triggering action element. |
-| `@FrontletParameter` | Binds a stable parameter of the current frontlet. |
-| `@ModalParameter` | Binds a stable parameter of the current modal. |
+| Annotation           | Use                                                      |
+|----------------------|----------------------------------------------------------|
+| `@Page`              | Maps a controller to a page URL.                         |
+| `@WelcomePage`       | Marks the default entry page.                            |
+| `@Frontlet`          | Marks a reusable frontlet controller.                    |
+| `@Modal`             | Marks a modal dialog controller.                         |
+| `@Include`           | Registers a reusable HTML include.                       |
+| `@ModelData`         | Exposes data to a template.                              |
+| `@FormData`          | Provides or receives form-bound data.                    |
+| `@Action`            | Exposes a method to template-triggered interactions.     |
+| `@PathVariable`      | Binds a value from the current page URL.                 |
+| `@QueryParameter`    | Binds a query parameter from the current page URL.       |
+| `@ActionParameter`   | Binds a parameter sent by the triggering action element. |
+| `@FrontletParameter` | Binds a stable parameter of the current frontlet.        |
+| `@ModalParameter`    | Binds a stable parameter of the current modal.           |
 
 ## Validation API
 
@@ -177,7 +182,8 @@ You normally do not need to add stylesheet links for application CSS under `publ
 XIS add it to the root page. The generated URLs omit the `public` segment, for example
 `src/main/resources/public/css/app.css` becomes `/css/app.css`.
 
-If you want to replace the XIS default styling completely, provide your own `src/main/resources/public/default-main.css`.
+If you want to replace the XIS default styling completely, provide your own
+`src/main/resources/public/default-main.css`.
 An empty file is enough when you want no default styling at all.
 
 If you want to start from the XIS default file instead of an empty replacement, copy it from the resolved dependency:
@@ -202,8 +208,10 @@ In XIS Boot development runs, public assets under `src/main/resources/public` ar
 available. CSS edits therefore become visible after a browser reload without rebuilding the application. Packaged jar
 resources remain static.
 
-For JavaScript, prefer [Custom JavaScript and custom EL functions](advanced/custom-javascript.md) when you want to extend
-the XIS browser runtime. Files listed through `META-INF/xis/js/extensions` are bundled into `/bundle.min.js`; files under
+For JavaScript, prefer [Custom JavaScript and custom EL functions](advanced/custom-javascript.md) when you want to
+extend
+the XIS browser runtime. Files listed through `META-INF/xis/js/extensions` are bundled into `/bundle.min.js`; files
+under
 `public` are loaded as normal root-page scripts.
 
 Optional JavaScript extension artifacts can register browser libraries through the same mechanism. For example,

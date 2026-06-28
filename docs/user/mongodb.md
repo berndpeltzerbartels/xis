@@ -2,7 +2,8 @@
 
 [Documentation map](../../README.md)
 
-`xis-mongodb` provides a small MongoDB integration for XIS Boot applications and for applications that want to use MongoDB
+`xis-mongodb` provides a small MongoDB integration for XIS Boot applications and for applications that want to use
+MongoDB
 without Spring Data.
 
 The module is intentionally modest. It focuses on three things:
@@ -18,7 +19,7 @@ The module is intentionally modest. It focuses on three things:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {

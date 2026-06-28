@@ -9,7 +9,8 @@ XIS also provides fast integration tests. These tests create a lightweight XIS a
 the same controller/template lifecycle as the runtime, and let you inspect and interact with the resulting document.
 
 If your build uses the [XIS Gradle plugin and tools](gradle-plugin.md), the XIS test starter and the JUnit 5 test
-platform are configured for you. Do not add `xis-test` or `xis-boot-starter-test` yourself in that case; the plugin keeps
+platform are configured for you. Do not add `xis-test` or `xis-boot-starter-test` yourself in that case; the plugin
+keeps
 the test dependency on the same version as the plugin.
 
 ## Generate Starter Tests
@@ -63,7 +64,8 @@ class DashboardPageTest {
 }
 ```
 
-When the XIS Gradle plugin generated this test, the required `xis-boot-starter-test` dependency has already been added by
+When the XIS Gradle plugin generated this test, the required `xis-boot-starter-test` dependency has already been added
+by
 the plugin.
 
 This works well with the template generator:
@@ -120,7 +122,8 @@ class ProductPageTest {
 }
 ```
 
-Test fields annotated with `one.xis.test.@InTestContext` are created once, registered in the XIS context, and injected into
+Test fields annotated with `one.xis.test.@InTestContext` are created once, registered in the XIS context, and injected
+into
 the test instance. Use this when the test needs a real, inspectable collaborator instead of a mock.
 
 ```java
@@ -363,6 +366,7 @@ void dropCallsTheAction() {
 The matching template can use normal `xis:drag` and `xis:drop` attributes:
 
 ```html
+
 <div id="source" xis:drag="from:${source}">Source</div>
 <div id="target" xis:drop="move(from, to='${target}')">Target</div>
 ```
@@ -374,27 +378,49 @@ See [Drag and drop](drag-and-drop.md) for the template syntax.
 Register individual classes or instances when you want a small, explicit test:
 
 ```java
-context = IntegrationTestContext.builder()
-        .withSingleton(ProductPage.class)
-        .withSingleton(productService)
-        .build();
+context =IntegrationTestContext.
+
+builder()
+        .
+
+withSingleton(ProductPage .class)
+        .
+
+withSingleton(productService)
+        .
+
+build();
 ```
 
 Use package scanning when the test should load a larger slice:
 
 ```java
-context = IntegrationTestContext.builder()
-        .withBasePackageClass(Application.class)
-        .build();
+context =IntegrationTestContext.
+
+builder()
+        .
+
+withBasePackageClass(Application .class)
+        .
+
+build();
 ```
 
 You can also include and exclude packages explicitly:
 
 ```java
-context = IntegrationTestContext.builder()
-        .withPackage("example.products")
-        .withoutPackage("example.external")
-        .build();
+context =IntegrationTestContext.
+
+builder()
+        .
+
+withPackage("example.products")
+        .
+
+withoutPackage("example.external")
+        .
+
+build();
 ```
 
 The XIS test context recognizes XIS context annotations and common Spring stereotypes for component discovery, but it is
@@ -437,7 +463,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.18.0"
+    testImplementation "one.xis:xis-boot-starter-test:0.19.0"
 }
 ```
 

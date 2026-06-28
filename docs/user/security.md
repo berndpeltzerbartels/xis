@@ -10,7 +10,7 @@ frontlet, action, form, and navigation APIs stay the same.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -30,7 +30,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -46,7 +46,8 @@ dependencies {
 
 ## Page And Action Roles
 
-Use `@Authenticated` when a page, frontlet, action method, action parameter, or action DTO requires a login but no named role. Use
+Use `@Authenticated` when a page, frontlet, action method, action parameter, or action DTO requires a login but no named
+role. Use
 `@Roles` when at least one named application role is required.
 
 `@Authenticated` is a good fit for community areas, profile pages, carts, or applications where a login is enough:
@@ -118,7 +119,8 @@ parameter, or DTO that actually requires protection.
 
 ## DTO Roles
 
-`@Authenticated` can be put on an individual action parameter when that parameter should only be deserialized for logged-in
+`@Authenticated` can be put on an individual action parameter when that parameter should only be deserialized for
+logged-in
 users. `@Roles` belongs on a DTO type used by an action parameter.
 
 ```java
@@ -303,7 +305,8 @@ class AppUser implements UserAccount {
 ```
 
 In a local-only application XIS does not call `saveUserAccount`; throwing `UnsupportedOperationException` makes an
-accidental call visible. For external OpenID Connect logins this is different: `saveUserAccount` is part of the successful
+accidental call visible. For external OpenID Connect logins this is different: `saveUserAccount` is part of the
+successful
 login flow and must not throw.
 
 The same service in a Spring application uses the Spring stereotype instead:
@@ -367,7 +370,8 @@ The form binding, field bindings, hidden `state`, and `login` action name belong
 surrounding markup, labels, layout, CSS classes, and text are application design.
 
 Local login uses normal XIS validation. When credentials are wrong, the login action is not executed and a global
-validation message is returned. Render it with `<xis:global-messages/>` inside the `login` form. Field messages and error
+validation message is returned. Render it with `<xis:global-messages/>` inside the `login` form. Field messages and
+error
 highlighting use the same tags and attributes as any other form: `xis:message-for`, `xis:error-class`,
 `xis:error-style`, and `xis:error-binding`.
 
@@ -482,7 +486,8 @@ that SVG on their own account/security page.
 `xis-totp` also provides `/totp-setup.html` as a default setup page. It uses the same basic CSS hooks as the default
 login page (`container`, `form_container`, `form-group`, `form-control`, `btn`, `btn-primary`) plus TOTP-specific hooks
 such as `totp-setup-container`, `totp-setup-form`, `totp-setup-error`, `totp-setup-qr-code`, and
-`totp-setup-login-link`. Applications can usually style the built-in page with CSS; add a `totp-setup.html` resource only
+`totp-setup-login-link`. Applications can usually style the built-in page with CSS; add a `totp-setup.html` resource
+only
 when the page structure itself should be replaced.
 
 ## External IDP
@@ -546,9 +551,12 @@ local login form.
 not necessarily the visible login name or email address.
 
 After the callback, XIS always issues its own local application token. With no custom `UserAccountService`, XIS uses the
-external `sub` as the local user id. If the provider access token is a readable JWT with roles in `realm_access.roles` or
-`resource_access.account.roles`, those roles are copied into the local XIS token. If the provider token is opaque or does
-not carry application roles, protect pages with `@Authenticated` or provide a `UserAccountService` that maps the external user
+external `sub` as the local user id. If the provider access token is a readable JWT with roles in `realm_access.roles`
+or
+`resource_access.account.roles`, those roles are copied into the local XIS token. If the provider token is opaque or
+does
+not carry application roles, protect pages with `@Authenticated` or provide a `UserAccountService` that maps the
+external user
 to local roles in `saveUserAccount`.
 
 By default XIS requests the `openid` scope. Providers may require additional scopes for role claims. Override
@@ -608,20 +616,27 @@ http://localhost:8080/xis/auth/callback/google
 Use the actual application origin instead of `http://localhost:8080` and the same provider id that `getIdpId()` returns
 instead of `google`.
 
-Google's token response contains an `id_token`, which is the OpenID Connect identity JWT. The `access_token` is meant for
+Google's token response contains an `id_token`, which is the OpenID Connect identity JWT. The `access_token` is meant
+for
 Google APIs. XIS therefore reads the Google `id_token` after the callback and issues its own application token. For a
-simple community login, no `UserAccountService` is required: the Google `sub` claim becomes the XIS user id and the local
+simple community login, no `UserAccountService` is required: the Google `sub` claim becomes the XIS user id and the
+local
 token has no named roles.
 
-Use a `UserAccountService` only when the application wants to store or enrich the Google user, for example for an approval
-workflow, profile data, or application roles. Use the application's own concrete `UserAccount` implementation as the generic
-type. During the callback, XIS copies Google profile claims from the `id_token` into that object before `saveUserAccount` is
+Use a `UserAccountService` only when the application wants to store or enrich the Google user, for example for an
+approval
+workflow, profile data, or application roles. Use the application's own concrete `UserAccount` implementation as the
+generic
+type. During the callback, XIS copies Google profile claims from the `id_token` into that object before
+`saveUserAccount` is
 called.
 
-`saveUserAccount` is called after the external provider has successfully authenticated the user and before XIS creates its
+`saveUserAccount` is called after the external provider has successfully authenticated the user and before XIS creates
+its
 own local application token. This is the hook for creating or updating the application's account for that external user:
 store profile data, attach approval state, or assign application roles. If the application does not need local user data
-at all, leave the `UserAccountService` out. If it provides one, `saveUserAccount` must be able to accept the externally loaded
+at all, leave the `UserAccountService` out. If it provides one, `saveUserAccount` must be able to accept the externally
+loaded
 user. A no-op implementation is acceptable when the application deliberately keeps no local copy, but throwing an
 exception is not: the method is part of the successful external login flow.
 
@@ -673,7 +688,8 @@ class AppUser implements UserAccount {
 For a real application, replace the in-memory map with your user database or approval workflow. If the application only
 needs a community login, leave the `UserAccountService` out and protect pages with `@Authenticated`. If the application
 needs named roles, provide a `UserAccountService` and assign roles in `saveUserAccount`. XIS calls
-`saveUserAccount` during the Google callback before it creates the local XIS token, so role assignments made there are part
+`saveUserAccount` during the Google callback before it creates the local XIS token, so role assignments made there are
+part
 of the token used for the redirected page.
 
 The client id and client secret from Google are returned by `getClientId()` and `getClientSecret()`. For normal Google
@@ -728,13 +744,15 @@ application has no local credentials service.
 
 ### Multiple External OpenID Connect Providers Without Local Authentication
 
-Provide multiple `ExternalIDPConfig` instances and no `LocalCredentialService`. When a protected page is opened without a
+Provide multiple `ExternalIDPConfig` instances and no `LocalCredentialService`. When a protected page is opened without
+a
 valid login, XIS redirects to `/login.html` so the user can choose the provider.
 
 The login page renders only provider links. A custom `login.html` must render `externalIdpIds` and `externalIdpUrls`; it
 should not show a local username/password form unless the application also provides a `LocalCredentialService`.
 
-`UserAccountService` is optional when the application only uses external providers. XIS reads the OpenID Connect `id_token`
+`UserAccountService` is optional when the application only uses external providers. XIS reads the OpenID Connect
+`id_token`
 after the callback and issues its own local application token. If no `UserAccountService` is present, the OpenID Connect
 `sub` claim becomes the XIS user id. If the provider access token is a readable JWT with roles in `realm_access.roles`
 or `resource_access.account.roles`, XIS copies those roles into the local token. Providers such as Google usually issue
@@ -843,7 +861,8 @@ The IDP publishes the OpenID Connect discovery document, JWKS, login page, and t
 configure the XIS IDP like any other external OpenID Connect provider by using `ExternalIDPConfig` and the IDP base URL.
 
 To create or update credentials, inject `IDPCredentialService` and call `setUserPassword` or `setClientSecret`. Do this
-from an application setup flow, an admin UI, or a controlled bootstrap component. The service hashes the submitted secret
+from an application setup flow, an admin UI, or a controlled bootstrap component. The service hashes the submitted
+secret
 before it reaches the repository.
 
 ```java
@@ -873,7 +892,8 @@ class IDPBootstrapCredentials {
 ## SSO In Distributed XIS Applications
 
 Distributed XIS applications can share one login across a shell application and remote XIS runtimes. The browser logs in
-at one application, receives the XIS `access_token` and `refresh_token` cookies, and sends those cookies to the remote XIS
+at one application, receives the XIS `access_token` and `refresh_token` cookies, and sends those cookies to the remote
+XIS
 runtime when a remote page, frontlet, action, or SSE event stream is used.
 
 After an external OpenID Connect callback, XIS issues local XIS tokens. That is intentional: the application can map or
@@ -890,7 +910,8 @@ For XIS as an IDP, this is the intended setup:
 - remote hosts are listed in the distributed configuration so XIS opens remote XIS requests and remote SSE connections
 - participating XIS applications use shared local token keys so they can validate the XIS cookies issued by the shell
 
-The remote application does not receive the shell application's server-side state. It receives the same token cookies and
+The remote application does not receive the shell application's server-side state. It receives the same token cookies
+and
 validates the XIS token signature locally. Its `ExternalIDPConfig` is still needed when the remote application may start
 or renew an external login flow itself.
 
@@ -899,11 +920,13 @@ issuer and then issue or accept local XIS tokens consistently. If an application
 Keycloak access token must be a JWT with the role claims XIS expects. Configure redirect URIs for applications that may
 initiate login directly.
 
-For different domains, remember normal browser cookie rules. The browser only sends cookies to hosts for which the cookie
+For different domains, remember normal browser cookie rules. The browser only sends cookies to hosts for which the
+cookie
 is valid. Same-site local development such as different `localhost` ports works naturally; separate production domains
 may require a shared parent domain and matching cookie configuration. If that is not possible, use a central XIS IDP or
 another broker pattern and keep application domains planned around browser cookie rules.
 
-The built-in IDP login flow is still a XIS login flow backed by `IDPService`. If the IDP application needs a more complex
+The built-in IDP login flow is still a XIS login flow backed by `IDPService`. If the IDP application needs a more
+complex
 interactive process, such as multi-step registration or manual account approval, model that process in the IDP
 application and allow credential validation only after the account is ready.

@@ -6,7 +6,8 @@ XIS supports Kotlin for controller classes, components, form objects, and standa
 server-driven programming model applies: controllers declare pages, model data, form data, and actions; HTML templates
 declare the UI.
 
-Kotlin works on the normal JVM path and with XIS Boot Native. That means a Kotlin XIS Boot application can be packaged as
+Kotlin works on the normal JVM path and with XIS Boot Native. That means a Kotlin XIS Boot application can be packaged
+as
 a runnable JVM jar or compiled to a GraalVM native executable with the XIS Gradle plugin.
 
 ## Requirements
@@ -19,7 +20,7 @@ Use the Kotlin JVM plugin together with the XIS Gradle plugin:
 plugins {
     id "java"
     id "org.jetbrains.kotlin.jvm" version "2.0.21"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -118,7 +119,8 @@ Groovy controllers.
 
 For form and model DTOs, prefer mutable properties with defaults or nullable properties. XIS creates and fills these
 objects from Java-side framework code. Kotlin non-null types are compile-time contracts for Kotlin callers, but Java
-reflection can still leave a property unset or pass `null` into generated accessors. Defaults like `var name: String = ""`
+reflection can still leave a property unset or pass `null` into generated accessors. Defaults like
+`var name: String = ""`
 are therefore friendlier than `lateinit var name: String` or constructor-only DTOs without defaults.
 
 ## Template Location

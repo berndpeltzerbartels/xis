@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 ```
 
@@ -35,15 +35,15 @@ dependencies {
 
 The plugin applies the Java plugin and configures the normal XIS build support:
 
-| Area | What happens |
-| --- | --- |
-| HTML templates | `.html` files under `src/main/java` are copied into the runtime resources. |
-| Annotation processing | `xis-apt` is added as annotation processor with the same version as the plugin. |
-| Integration tests | `xis-boot-starter-test` is added for tests and JUnit Platform is enabled. The starter brings `xis-test`, `@XisBootTest`, and JUnit Jupiter. |
-| Dependency versions | XIS dependencies used by the plugin are aligned to the plugin version. |
-| XIS catalogs | The plugin generates component catalogs for reusable XIS libraries. Projects that also declare `xis-boot-native` generate native catalogs. |
-| XIS validation | `xisValidate` runs XIS validation checks. The task is intended for local development and CI pipelines. |
-| XIS Boot jars | Projects that use `xis-boot` or `xis-boot-http` get `xisJar` and `xisRun` tasks. |
+| Area                  | What happens                                                                                                                                |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| HTML templates        | `.html` files under `src/main/java` are copied into the runtime resources.                                                                  |
+| Annotation processing | `xis-apt` is added as annotation processor with the same version as the plugin.                                                             |
+| Integration tests     | `xis-boot-starter-test` is added for tests and JUnit Platform is enabled. The starter brings `xis-test`, `@XisBootTest`, and JUnit Jupiter. |
+| Dependency versions   | XIS dependencies used by the plugin are aligned to the plugin version.                                                                      |
+| XIS catalogs          | The plugin generates component catalogs for reusable XIS libraries. Projects that also declare `xis-boot-native` generate native catalogs.  |
+| XIS validation        | `xisValidate` runs XIS validation checks. The task is intended for local development and CI pipelines.                                      |
+| XIS Boot jars         | Projects that use `xis-boot` or `xis-boot-http` get `xisJar` and `xisRun` tasks.                                                            |
 
 This means a normal application does not need to wire the XIS annotation processor, `xis-test`, or
 `xis-boot-starter-test` manually.
@@ -57,7 +57,8 @@ framework-managed classes such as components, pages, frontlets, modals, reposito
 
 Those catalogs are especially important for XIS Boot Native. A native application can consume a reusable XIS library
 without source access when the library jar contains the generated XIS catalog resources. If the library contributes XIS
-components to a native executable, it must also declare `xis-boot-native`; that explicit dependency opts the library into
+components to a native executable, it must also declare `xis-boot-native`; that explicit dependency opts the library
+into
 native catalog generation.
 
 A plain Java library without the XIS plugin does not automatically contribute XIS components to a native application.
@@ -97,19 +98,20 @@ the task creates:
 src/main/java/example/dashboard/DashboardPage.html
 ```
 
-The generated file is only a starting point. It is written next to the Java controller so the controller and template can
+The generated file is only a starting point. It is written next to the Java controller so the controller and template
+can
 be edited together. Existing templates are not overwritten.
 
 When the controller already exposes `@ModelData`, `@FormData`, or `@Action` methods, the generated template uses them as
 a starter sketch:
 
-| Controller member | Generated template sketch |
-| --- | --- |
-| scalar `@ModelData` | A simple expression such as `${title}`. |
-| iterable `@ModelData` | A small `xis:foreach` block with one repeated item. |
-| `@FormData` | A form with `xis:binding`, labels, inputs, `xis:message-for`, and error styling hooks. |
-| `@Action` with matching form data | A form submit button using `xis:action`. |
-| standalone `@Action` | A button with `type="button"` and `xis:action`. |
+| Controller member                 | Generated template sketch                                                              |
+|-----------------------------------|----------------------------------------------------------------------------------------|
+| scalar `@ModelData`               | A simple expression such as `${title}`.                                                |
+| iterable `@ModelData`             | A small `xis:foreach` block with one repeated item.                                    |
+| `@FormData`                       | A form with `xis:binding`, labels, inputs, `xis:message-for`, and error styling hooks. |
+| `@Action` with matching form data | A form submit button using `xis:action`.                                               |
+| standalone `@Action`              | A button with `type="button"` and `xis:action`.                                        |
 
 Form fields are derived from record components or non-static fields. The generator uses simple input type hints:
 booleans become checkboxes, numeric values become number inputs, date-like values become date inputs, and other values
@@ -120,7 +122,8 @@ The generator intentionally produces plain HTML. It does not try to design the p
 the final layout for you. Treat the result as a first executable template that already knows the controller contract.
 
 When the project also applies the Groovy or Kotlin plugin, `xisTemplates` scans those page and frontlet controllers too.
-For Groovy and Kotlin controllers, generated templates are written under `src/main/resources` with the controller package
+For Groovy and Kotlin controllers, generated templates are written under `src/main/resources` with the controller
+package
 path.
 
 ## `xisTests`
@@ -211,18 +214,18 @@ application would fail when the page or frontlet is loaded.
 
 The current checks cover the places where mistakes are easy to miss in a browser:
 
-| Area | Examples |
-| --- | --- |
-| Attribute dependencies | `xis:error-class` and `xis:error-style` require `xis:binding` or `xis:error-binding`. |
-| Mandatory attributes | Framework elements such as `<xis:foreach>`, `<xis:if>`, `<xis:form>`, `<xis:input>`, `<xis:submit>`, and `<xis:parameter>` must declare the attributes that identify their data, action, or target. See [Element required attributes](tags-and-attributes.md#element-required-attributes). |
-| Attribute syntax | `xis:foreach`, `xis:repeat`, and `xis:drag` use `name:expression`; `xis:drop` uses `actionName(...)`. |
-| Framework element syntax | `<xis:a>` and `<xis:button>` need a navigation or action target; `<xis:parameter>` needs `name`; storage bindings need a supported store. |
-| Unknown framework elements | Unknown `xis:*` elements fail validation so typos such as `<xis:for-each>` do not silently render as inert HTML. |
-| Attribute placement | navigation attributes belong on links or buttons; form bindings belong on form controls or labels. |
-| Selection styling | `xis:selection-class` needs a surrounding `xis:selection-group`. |
-| Template data | expressions such as `${customer.firstName}` must have matching `@ModelData`; exposed model/form data must be used by the template. |
-| Template properties | property paths such as `${customer.address.city}` are checked against fields, record components, getters, setters, and inherited members where the type is known. Repeat variables are checked against the element type of the repeated model data. |
-| Form fields | bindings inside `<form xis:binding="...">` or `<xis:form binding="...">` are checked against the matching `@FormData` object. |
+| Area                       | Examples                                                                                                                                                                                                                                                                                   |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Attribute dependencies     | `xis:error-class` and `xis:error-style` require `xis:binding` or `xis:error-binding`.                                                                                                                                                                                                      |
+| Mandatory attributes       | Framework elements such as `<xis:foreach>`, `<xis:if>`, `<xis:form>`, `<xis:input>`, `<xis:submit>`, and `<xis:parameter>` must declare the attributes that identify their data, action, or target. See [Element required attributes](tags-and-attributes.md#element-required-attributes). |
+| Attribute syntax           | `xis:foreach`, `xis:repeat`, and `xis:drag` use `name:expression`; `xis:drop` uses `actionName(...)`.                                                                                                                                                                                      |
+| Framework element syntax   | `<xis:a>` and `<xis:button>` need a navigation or action target; `<xis:parameter>` needs `name`; storage bindings need a supported store.                                                                                                                                                  |
+| Unknown framework elements | Unknown `xis:*` elements fail validation so typos such as `<xis:for-each>` do not silently render as inert HTML.                                                                                                                                                                           |
+| Attribute placement        | navigation attributes belong on links or buttons; form bindings belong on form controls or labels.                                                                                                                                                                                         |
+| Selection styling          | `xis:selection-class` needs a surrounding `xis:selection-group`.                                                                                                                                                                                                                           |
+| Template data              | expressions such as `${customer.firstName}` must have matching `@ModelData`; exposed model/form data must be used by the template.                                                                                                                                                         |
+| Template properties        | property paths such as `${customer.address.city}` are checked against fields, record components, getters, setters, and inherited members where the type is known. Repeat variables are checked against the element type of the repeated model data.                                        |
+| Form fields                | bindings inside `<form xis:binding="...">` or `<xis:form binding="...">` are checked against the matching `@FormData` object.                                                                                                                                                              |
 
 The validation is intentionally a preflight check, not a replacement for tests. It catches most common mistakes around
 template variables, form bindings, missing attributes, and misspelled properties before the application starts. A
@@ -237,7 +240,8 @@ When the project declares `xis-boot` or `xis-boot-http`, the plugin adds:
 ./gradlew xisJar
 ```
 
-The task creates an executable XIS Boot jar with the XIS Boot runner as main class. Spring Boot applications normally use
+The task creates an executable XIS Boot jar with the XIS Boot runner as main class. Spring Boot applications normally
+use
 the Spring Boot plugin tasks instead.
 
 For the advanced HTTP-controller-only runtime, the same task is available when the project declares
@@ -266,7 +270,8 @@ the XIS jar.
 
 ## `xisRun`
 
-When the project declares `xis-boot`, `xis-boot-http`, `xis-http-controller`, or `xis-http-controller-native`, the plugin also adds:
+When the project declares `xis-boot`, `xis-boot-http`, `xis-http-controller`, or `xis-http-controller-native`, the
+plugin also adds:
 
 ```bash
 ./gradlew xisRun
@@ -303,7 +308,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.18.0"
+    testImplementation "one.xis:xis-boot-starter-test:0.19.0"
 }
 ```
 

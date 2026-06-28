@@ -16,7 +16,8 @@ Write extension files as strict, browser-compatible plain JavaScript. XIS bundle
 browser runtime; they are not loaded as JavaScript modules. Do not use `export` / `import` syntax in these files.
 
 XIS exposes only a small public browser API as `window.XIS`. The internal application runtime is intentionally not
-published as `window.app`, so separate static scripts cannot mutate framework internals by accident. JavaScript extension
+published as `window.app`, so separate static scripts cannot mutate framework internals by accident. JavaScript
+extension
 files can use this API while the bundle is loaded, for example to register expression-language functions.
 
 ## Register Extension Files
@@ -51,7 +52,7 @@ artifact:
 
 ```groovy
 dependencies {
-    implementation "one.xis:xis-javascript-jquery:0.18.0"
+    implementation "one.xis:xis-javascript-jquery:0.19.0"
 }
 ```
 
@@ -105,8 +106,10 @@ decisions. Keep validation, permissions, persistence, and business decisions in 
 ## Publish Your Own JavaScript Extension Artifact
 
 XIS searches the whole classpath for JavaScript extension registries. That makes it easy to create your own artifact
-that adds JavaScript to every application that depends on it. A reusable JavaScript extension artifact is just a JAR with
-normal resources. The artifact can contain application code, a company-specific helper library, or a small wrapper around
+that adds JavaScript to every application that depends on it. A reusable JavaScript extension artifact is just a JAR
+with
+normal resources. The artifact can contain application code, a company-specific helper library, or a small wrapper
+around
 a browser library. It can also be a reusable EL function library for templates used across several applications.
 
 For example, a company could publish an internal browser-behavior artifact:
@@ -176,6 +179,7 @@ Keep this kind of code small and defensive. XIS will load it for the application
 Most forms should be submitted by a normal XIS submit button:
 
 ```html
+
 <button type="submit" xis:action="save">Save</button>
 ```
 
@@ -211,6 +215,7 @@ src/main/resources/public/
 Reference them from templates without the `public` segment:
 
 ```html
+
 <link rel="stylesheet" href="/css/app.css">
 <img src="/images/logo.png" alt="Logo">
 ```

@@ -18,7 +18,7 @@ the database by itself, not even inside a transaction. Database writes happen on
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -58,7 +58,7 @@ XIS can create a HikariCP-backed pool when HikariCP is on the application classp
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -170,6 +170,7 @@ Annotate entities with `@Entity`. Field names map directly to column names, and 
 underscore column names.
 
 ```java
+
 @Entity("customers")
 record Customer(long id, String firstName, String lastName) {
 }
@@ -202,6 +203,7 @@ for example a library class may expose roles as a JSON column while one applicat
 another loads them from a separate role table in its `UserAccountService`.
 
 ```java
+
 @Entity("employees")
 class Employee extends UserAccountImpl {
     long id;
@@ -211,9 +213,11 @@ class Employee extends UserAccountImpl {
 
 `UserAccountImpl` already marks its OpenID Connect profile fields as optional SQL columns. Its `roles` property is both
 `@OptionalColumn` and `@JsonColumn`: if `employees.roles` exists, XIS reads and writes it as JSON. If the column is
-missing, generated `@Insert`, `@Update`, and `@Save` statements omit it and result mapping leaves the property unchanged.
+missing, generated `@Insert`, `@Update`, and `@Save` statements omit it and result mapping leaves the property
+unchanged.
 `userId` is not optional because it is the stable local user id used for authentication tokens. This is intentionally
-explicit: `@OptionalColumn` is for cross-project entity reuse, not for hiding ordinary spelling mistakes in column names.
+explicit: `@OptionalColumn` is for cross-project entity reuse, not for hiding ordinary spelling mistakes in column
+names.
 
 ## Example With Relations
 
@@ -223,7 +227,8 @@ foreign key points to `customers.id`.
 Keep relation graphs small and intentional. XIS does not support lazy loading, and it is usually a better design to load
 only the aggregate you actually need. Relations such as invoice and invoice item are natural candidates for one loaded
 object graph. Broad models such as `Customer` with every `Order`, every contact, and every secondary object hanging off
-it are usually harder to reason about and easier to break. Prefer separate repositories and explicit queries when objects
+it are usually harder to reason about and easier to break. Prefer separate repositories and explicit queries when
+objects
 are not tightly coupled.
 
 ```sql
@@ -316,6 +321,7 @@ A repository is an interface annotated with `@Repository`. Generic CRUD reposito
 single-column primary key.
 
 ```java
+
 @Repository
 interface CustomerRepository extends CrudRepository<Customer, Long> {
 
@@ -362,6 +368,7 @@ relations are rejected.
 With explicit SQL, parameters can be bound with JDBC `?` placeholders or with named placeholders:
 
 ```java
+
 @Insert("insert into customers (id, first_name, last_name) values ({id}, {firstName}, {lastName})")
 int insert(@Param("id") long id,
            @Param("firstName") String firstName,
@@ -371,6 +378,7 @@ int insert(@Param("id") long id,
 Entity parameters can be used directly:
 
 ```java
+
 @Insert("insert into customers (id, first_name, last_name) values ({id}, {firstName}, {lastName})")
 Customer insert(Customer customer);
 ```
@@ -379,6 +387,7 @@ If the annotation value is empty, the method must have exactly one entity parame
 builds the statement:
 
 ```java
+
 @Insert
 int insert(Customer customer);
 
@@ -429,6 +438,7 @@ delete semantics.
 With SQL, `@Save` behaves like a normal modification statement:
 
 ```java
+
 @Save("insert into customers (id, first_name, last_name) values ({id}, {firstName}, {lastName})")
 Customer insert(Customer customer);
 ```
@@ -442,11 +452,13 @@ This form does not inspect foreign-key metadata and does not cascade through obj
 Without SQL, `@Delete` deletes one entity instance:
 
 ```java
+
 @Delete
 boolean deleteCustomer(Customer customer);
 ```
 
-XIS reads primary-key and foreign-key metadata from the database. It deletes child collections from the leaves toward the
+XIS reads primary-key and foreign-key metadata from the database. It deletes child collections from the leaves toward
+the
 root and then deletes the root row. If a foreign key declares `ON DELETE CASCADE`, XIS skips the redundant direct delete
 for that child table, but still evaluates deeper child relations first because those deeper constraints may not cascade.
 For composite primary keys, `@Delete` deletes the root entity by all primary-key columns. Object graph cascade handling
@@ -455,6 +467,7 @@ is available for single-column primary-key relations.
 With SQL, `@Delete` behaves like `@Insert` or `@Update`:
 
 ```java
+
 @Delete("delete from customers where id = {id}")
 int deleteOnlyCustomerRow(@Param("id") long id);
 ```
@@ -470,7 +483,8 @@ bytecode generation. This keeps the runtime simple, fast, easy to debug, and fri
 called through that interface. XIS intentionally avoids bytecode enhancement.**
 
 `@Transactional` is `one.xis.sql.Transactional`. It is advice, not a marker that repository handlers inspect directly.
-That is important: XIS can only apply it when it creates an interface proxy. Calling a concrete implementation directly is
+That is important: XIS can only apply it when it creates an interface proxy. Calling a concrete implementation directly
+is
 just a normal Java method call and will not open a transaction.
 
 For application code, the most common shape is the Spring-like one: put `@Transactional` on the implementing service
@@ -513,6 +527,7 @@ The same type-level variant also works on the service interface itself.
 If every method of a service should run in a transaction, annotate the implementing class:
 
 ```java
+
 @Transactional
 @Service
 class CustomerServiceImpl implements CustomerService {
@@ -524,7 +539,8 @@ class CustomerServiceImpl implements CustomerService {
 }
 ```
 
-Type-level `@Transactional` applies to all methods called through the proxied interface. In all cases, inject and call the
+Type-level `@Transactional` applies to all methods called through the proxied interface. In all cases, inject and call
+the
 service through the interface. Injecting `CustomerServiceImpl` instead of `CustomerService` bypasses interface advice.
 
 The JDBC connection is opened lazily. Entering a transactional method only marks the current request/thread as
@@ -534,10 +550,12 @@ If the method completes normally, XIS commits the transaction. If it throws, XIS
 calls join the already active transaction. XIS intentionally keeps the rule simple: there are no JPA-style rollback
 rules for checked versus unchecked exceptions.
 
-`@Transactional` is still available for repository default methods. It is useful when the transaction boundary is truly a
+`@Transactional` is still available for repository default methods. It is useful when the transaction boundary is truly
+a
 repository operation:
 
 ```java
+
 @Repository
 interface CustomerRepository {
 
@@ -568,6 +586,7 @@ During an HTTP request, an open transaction is completed automatically when requ
 `@Function` calls a database function. The Java method return value is the function return value:
 
 ```java
+
 @Function("calculate_discount")
 BigDecimal calculateDiscount(@Param("customerId") long customerId);
 ```
@@ -582,6 +601,7 @@ XIS calls it through JDBC as a callable statement with a function return slot:
 return `void`, `boolean`, a number, or one of the method parameter types:
 
 ```java
+
 @StoredProcedure("archive_customer")
 int archiveCustomer(@Param("customerId") long customerId);
 ```
@@ -590,6 +610,7 @@ A stored procedure may also expose exactly one OUT parameter as the Java return 
 the annotation and is appended after all Java method parameters:
 
 ```java
+
 @StoredProcedure(value = "calculate_discount", out = "discount")
 BigDecimal calculateDiscount(@Param("customerId") long customerId);
 ```

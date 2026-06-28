@@ -22,7 +22,7 @@ Add `xis-theme` next to your runtime dependency.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -42,7 +42,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 repositories {
@@ -85,6 +85,7 @@ Use `xt:navigation` for the standard theme navigation. It creates the logo, `<na
 Original:
 
 ```html
+
 <xt:navigation logo="/theme-logo.svg" logo-alt="Acme CRM">
     <xt:nav-item page="/dashboard.html" label="Dashboard"/>
     <xt:nav-group label="Customers">
@@ -98,6 +99,7 @@ Original:
 Generated:
 
 ```html
+
 <nav class="nav">
     <div class="logo">
         <img src="/theme-logo.svg" alt="Acme CRM">
@@ -129,10 +131,11 @@ technical field name; `title` is the text shown to the user.
 Original:
 
 ```html
+
 <xt:form-page title="Edit customer"
-                 binding="customer"
-                 action="saveCustomer"
-                 submit-label="Save">
+              binding="customer"
+              action="saveCustomer"
+              submit-label="Save">
     <xt:input binding="firstName" title="First name"/>
     <xt:input binding="lastName" title="Last name"/>
     <xt:select binding="stage" title="Stage" options="stages"/>
@@ -145,6 +148,7 @@ Original:
 Generated:
 
 ```html
+
 <main class="wrapper">
     <h1>Edit customer</h1>
     <form xis:binding="customer">
@@ -176,6 +180,7 @@ Generated:
 The controller stays ordinary XIS code:
 
 ```java
+
 @Page("/customers.html")
 class CustomersPage {
 
@@ -211,6 +216,7 @@ standard form page.
 Original:
 
 ```html
+
 <xt:form binding="customer" action="saveCustomer" submit-label="Save">
     <xt:input binding="firstName" title="First name"/>
     <xt:input binding="lastName" title="Last name"/>
@@ -220,6 +226,7 @@ Original:
 Generated:
 
 ```html
+
 <form xis:binding="customer">
     <div class="form-field">
         <label for="firstName" xis:binding="firstName" xis:error-class="error">First name</label>
@@ -244,12 +251,14 @@ Use `xt:input` for a complete field with label, input, error class hook, and mes
 Original:
 
 ```html
+
 <xt:input binding="email" title="E-mail address" type="email"/>
 ```
 
 Generated:
 
 ```html
+
 <div class="form-field">
     <label for="email" xis:binding="email" xis:error-class="error">E-mail address</label>
     <input id="email" type="email" xis:binding="email" xis:error-class="error">
@@ -260,6 +269,7 @@ Generated:
 Normal input attributes are kept:
 
 ```html
+
 <xt:input binding="amount" title="Amount" type="number" min="0" step="0.01" placeholder="0.00"/>
 ```
 
@@ -269,12 +279,14 @@ Use `span` when the generated field wrapper should span several grid columns. Th
 Original:
 
 ```html
+
 <xt:input binding="notes" title="Notes" span="2"/>
 ```
 
 Generated:
 
 ```html
+
 <div class="form-field span2">
     <label for="notes" xis:binding="notes" xis:error-class="error">Notes</label>
     <input id="notes" type="text" xis:binding="notes" xis:error-class="error">
@@ -290,12 +302,14 @@ elements.
 Original:
 
 ```html
+
 <xt:select binding="stage" title="Stage" options="stages"/>
 ```
 
 Generated:
 
 ```html
+
 <div class="form-field">
     <label for="stage" xis:binding="stage" xis:error-class="error">Stage</label>
     <select id="stage" xis:binding="stage" xis:error-class="error">
@@ -312,29 +326,33 @@ For option objects, use `option-value` and `option-label`.
 Original:
 
 ```html
+
 <xt:select binding="stage" title="Stage" options="stages" option-value="code" option-label="label"/>
 ```
 
 Generated option:
 
 ```html
+
 <option xis:repeat="option:stages" value="${option.code}">${option.label}</option>
 ```
 
 Use `option-var` when another variable name reads better:
 
 ```html
+
 <xt:select binding="stage"
-              title="Stage"
-              options="stages"
-              option-var="stage"
-              option-value="code"
-              option-label="label"/>
+           title="Stage"
+           options="stages"
+           option-var="stage"
+           option-value="code"
+           option-label="label"/>
 ```
 
 This becomes:
 
 ```html
+
 <option xis:repeat="stage:stages" value="${stage.code}">${stage.label}</option>
 ```
 
@@ -346,12 +364,14 @@ way as `xt:input`.
 Original:
 
 ```html
+
 <xt:textarea binding="notes" title="Notes" rows="5" span="2"/>
 ```
 
 Generated:
 
 ```html
+
 <div class="form-field span2">
     <label for="notes" xis:binding="notes" xis:error-class="error">Notes</label>
     <textarea id="notes" rows="5" xis:binding="notes" xis:error-class="error"></textarea>
@@ -362,6 +382,7 @@ Generated:
 Use `xt:checkbox` for boolean values:
 
 ```html
+
 <xt:checkbox binding="newsletter" title="Newsletter"/>
 ```
 
@@ -371,11 +392,12 @@ Radio groups are intentionally closer to `xt:select` than to raw `<input type="r
 Original:
 
 ```html
+
 <xt:radio binding="preferredContact"
-             title="Preferred contact"
-             options="contactTypes"
-             option-value="code"
-             option-label="label"/>
+          title="Preferred contact"
+          options="contactTypes"
+          option-value="code"
+          option-label="label"/>
 ```
 
 Generated choice:
@@ -398,6 +420,7 @@ Likewise, `columns="2"` generates `col2`, `columns="4"` generates `col4`, and so
 Original:
 
 ```html
+
 <xt:grid columns="3">
     <xt:input binding="firstName" title="First name"/>
     <xt:input binding="lastName" title="Last name"/>
@@ -408,6 +431,7 @@ Original:
 Generated:
 
 ```html
+
 <section class="col3">
     <div class="form-field">
         ...
@@ -426,6 +450,7 @@ Generated:
 `columns` accepts `2` through `11`. The generated element is a `<section>` by default. Use `as` for another element:
 
 ```html
+
 <xt:grid as="div" columns="2">
     ...
 </xt:grid>
@@ -443,6 +468,7 @@ value of `xt:select` and `xt:radio` is checked as model data usage.
 Theme tags and normal XIS markup can be mixed when that makes a page clearer:
 
 ```html
+
 <form xis:binding="customer">
     <input xis:binding="id" type="hidden">
     <xt:input binding="firstName" title="First name"/>
@@ -469,19 +495,19 @@ customizing the default theme, not for replacing it.
 
 Useful variables:
 
-| Variable | Purpose |
-| --- | --- |
-| `--accent` | Primary color for buttons, active navigation, focus borders, and highlights |
-| `--text` | Main text color |
-| `--muted` | Secondary text color |
-| `--bg` | Main background color |
-| `--bg-secondary` | Secondary background color for tables and panels |
-| `--border` | General border color |
-| `--field-border` | Input, select, textarea, and fieldset border color |
-| `--radius` | Border radius for inputs, buttons, and panels |
-| `--base-font` | Base page font size |
-| `--form-font` | Form/control font size |
-| `--grid-gap` | Gap between grid columns |
+| Variable         | Purpose                                                                     |
+|------------------|-----------------------------------------------------------------------------|
+| `--accent`       | Primary color for buttons, active navigation, focus borders, and highlights |
+| `--text`         | Main text color                                                             |
+| `--muted`        | Secondary text color                                                        |
+| `--bg`           | Main background color                                                       |
+| `--bg-secondary` | Secondary background color for tables and panels                            |
+| `--border`       | General border color                                                        |
+| `--field-border` | Input, select, textarea, and fieldset border color                          |
+| `--radius`       | Border radius for inputs, buttons, and panels                               |
+| `--base-font`    | Base page font size                                                         |
+| `--form-font`    | Form/control font size                                                      |
+| `--grid-gap`     | Gap between grid columns                                                    |
 
 Add your own logo here:
 
@@ -492,6 +518,7 @@ src/main/resources/public/theme-logo.svg
 Use it from `xt:navigation`:
 
 ```html
+
 <xt:navigation logo="/theme-logo.svg" logo-alt="Acme CRM">
     ...
 </xt:navigation>
@@ -507,6 +534,7 @@ same CSS classes directly.
 Manual navigation:
 
 ```html
+
 <nav class="nav">
     <div class="logo">
         <img src="/theme-logo.svg" alt="Logo">
@@ -527,6 +555,7 @@ Manual navigation:
 Manual grid:
 
 ```html
+
 <main class="wrapper">
     <section class="col3">
         <div>First</div>
@@ -539,6 +568,7 @@ Manual grid:
 Use `span1` through `span9` when an item should span several columns:
 
 ```html
+
 <section class="col4">
     <div class="span2">Wide area</div>
     <div>Small area</div>
@@ -549,6 +579,7 @@ Use `span1` through `span9` when an item should span several columns:
 Manual form:
 
 ```html
+
 <form xis:binding="contact">
     <div class="col2">
         <div class="form-field">
@@ -573,12 +604,14 @@ Manual form:
 Use `button-secondary` for a secondary button style:
 
 ```html
+
 <button class="button-secondary" xis:action="cancel" type="button">Cancel</button>
 ```
 
 The theme also includes simple panel and message classes:
 
 ```html
+
 <div class="message">Saved successfully.</div>
 <div class="warning">Check the entered values.</div>
 <div class="tipp">Use the search field to narrow the list.</div>

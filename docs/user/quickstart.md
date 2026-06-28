@@ -29,7 +29,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.18.0"
+    id "one.xis.plugin" version "0.19.0"
 }
 
 group = "example"
@@ -103,7 +103,8 @@ The plugin can generate missing templates for page and frontlet controllers:
 
 Run this after adding a controller when you want XIS to create the template file in the right package. It is often worth
 writing the controller methods first, even if their bodies are still simple. When `xisTemplates` sees `@ModelData`,
-`@FormData`, and `@Action` methods, it can generate expressions, repeated blocks, forms, validation message placeholders,
+`@FormData`, and `@Action` methods, it can generate expressions, repeated blocks, forms, validation message
+placeholders,
 and action buttons that already match the controller. Generated templates are starting points; edit them like normal
 HTML.
 
@@ -114,7 +115,8 @@ The plugin can also generate starter integration tests for page controllers:
 ```
 
 Generated tests use `@XisBootTest`, register the page controller in the XIS test context, and open the page through its
-URL. The required XIS test starter is added automatically by the plugin. Generated tests compile before the full page behavior is
+URL. The required XIS test starter is added automatically by the plugin. Generated tests compile before the full page
+behavior is
 implemented, so you can use them for a TDD-style workflow: sketch the page class and its model/form/action methods, run
 `./gradlew xisTemplates xisTests`, edit the generated test until it describes the UI behavior you want, then implement
 the services and refine the template until the test passes.
@@ -168,8 +170,8 @@ already has a `title` model method, the generated template contains a `${title}`
     <title>${title}</title>
 </head>
 <body>
-    <h1>${title}</h1>
-    <p>Your first XIS page is running.</p>
+<h1>${title}</h1>
+<p>Your first XIS page is running.</p>
 </body>
 </html>
 ```
@@ -236,9 +238,9 @@ class CounterPage {
     <title>Counter</title>
 </head>
 <body>
-    <h1>Counter</h1>
-    <p>Current count: <span id="count">${count}</span></p>
-    <button id="increment" xis:action="increment">Increment</button>
+<h1>Counter</h1>
+<p>Current count: <span id="count">${count}</span></p>
+<button id="increment" xis:action="increment">Increment</button>
 </body>
 </html>
 ```
@@ -297,7 +299,7 @@ import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
 
 record CustomerForm(@Mandatory @LabelKey("customer.name") String name,
-        @Mandatory @EMail @LabelKey("customer.email") String email) {
+                    @Mandatory @EMail @LabelKey("customer.email") String email) {
 }
 ```
 
@@ -337,21 +339,21 @@ class CustomerNewPage {
     <title>Customer</title>
 </head>
 <body>
-    <h1>Customer</h1>
+<h1>Customer</h1>
 
-    <form xis:binding="customer">
-        <xis:global-messages/>
+<form xis:binding="customer">
+    <xis:global-messages/>
 
-        <label for="name" xis:error-binding="name" xis:error-style="color: #b00020">Name</label>
-        <input id="name" xis:binding="name" xis:error-class="error"/>
-        <div xis:message-for="name"></div>
+    <label for="name" xis:error-binding="name" xis:error-style="color: #b00020">Name</label>
+    <input id="name" xis:binding="name" xis:error-class="error"/>
+    <div xis:message-for="name"></div>
 
-        <label for="email" xis:error-binding="email" xis:error-style="color: #b00020">Email</label>
-        <input id="email" type="email" xis:binding="email" xis:error-class="error"/>
-        <div xis:message-for="email"></div>
+    <label for="email" xis:error-binding="email" xis:error-style="color: #b00020">Email</label>
+    <input id="email" type="email" xis:binding="email" xis:error-class="error"/>
+    <div xis:message-for="email"></div>
 
-        <button type="submit" xis:action="save">Save</button>
-    </form>
+    <button type="submit" xis:action="save">Save</button>
+</form>
 </body>
 </html>
 ```
@@ -365,7 +367,8 @@ validation.mandatory=${label} is required
 validation.email=Please enter a valid email address
 ```
 
-`xis:message-for` prints the field message. `<xis:global-messages/>` prints form-level validation messages. `xis:error-class`
+`xis:message-for` prints the field message. `<xis:global-messages/>` prints form-level validation messages.
+`xis:error-class`
 and `xis:error-style` let CSS or inline prototype styling highlight fields and labels while an error exists.
 
 ## Add SQL
@@ -594,32 +597,32 @@ class CustomerListPage {
     <title>Customers</title>
 </head>
 <body>
-    <h1>Customers</h1>
+<h1>Customers</h1>
 
-    <p>
-        <a xis:page="/customers/new.html">Add customer</a>
-    </p>
+<p>
+    <a xis:page="/customers/new.html">Add customer</a>
+</p>
 
-    <table>
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr xis:repeat="customer:${customers}">
-            <td>${customer.name}</td>
-            <td>${customer.email}</td>
-            <td>
-                <a xis:page="/customers/${customer.id}/edit.html">Edit</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr xis:repeat="customer:${customers}">
+        <td>${customer.name}</td>
+        <td>${customer.email}</td>
+        <td>
+            <a xis:page="/customers/${customer.id}/edit.html">Edit</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
 
-    <p xis:if="${empty(customers)}">No customers yet.</p>
+<p xis:if="${empty(customers)}">No customers yet.</p>
 </body>
 </html>
 ```
@@ -693,9 +696,9 @@ class CustomerFrontletPage {
     <title>Customers</title>
 </head>
 <body>
-    <h1>Customers</h1>
-    <main xis:frontlet-container="customer-main"
-          xis:default-frontlet="CustomerListFrontlet"></main>
+<h1>Customers</h1>
+<main xis:frontlet-container="customer-main"
+      xis:default-frontlet="CustomerListFrontlet"></main>
 </body>
 </html>
 ```
@@ -729,10 +732,12 @@ class CustomerListFrontlet {
 `src/main/java/example/customer/CustomerListFrontlet.html`
 
 ```html
+
 <xis:template xmlns:xis="https://xis.one/xsd">
     <p>
         <button xis:frontlet="CustomerFormFrontlet"
-                xis:target-container="customer-main">Add customer</button>
+                xis:target-container="customer-main">Add customer
+        </button>
     </p>
 
     <table>
@@ -789,7 +794,7 @@ class CustomerFormFrontlet {
 
     @Action
     Class<?> save(@FrontletParameter("customerId") @NullAllowed Long customerId,
-            @FormData("customer") CustomerForm customer) {
+                  @FormData("customer") CustomerForm customer) {
         customerService.save(customerId, customer);
         return CustomerListFrontlet.class;
     }
@@ -799,6 +804,7 @@ class CustomerFormFrontlet {
 `src/main/java/example/customer/CustomerFormFrontlet.html`
 
 ```html
+
 <xis:template xmlns:xis="https://xis.one/xsd">
     <form xis:binding="customer">
         <xis:global-messages/>
@@ -814,7 +820,8 @@ class CustomerFormFrontlet {
         <button type="submit" xis:action="save">Save</button>
         <button type="button"
                 xis:frontlet="CustomerListFrontlet"
-                xis:target-container="customer-main">Cancel</button>
+                xis:target-container="customer-main">Cancel
+        </button>
     </form>
 </xis:template>
 ```
@@ -923,7 +930,7 @@ class CustomerFormFrontlet {
     @Action
     @Roles("ADMIN")
     Class<?> save(@FrontletParameter("customerId") @NullAllowed Long customerId,
-            @FormData("customer") CustomerForm customer) {
+                  @FormData("customer") CustomerForm customer) {
         customerService.save(customerId, customer);
         return CustomerListFrontlet.class;
     }
@@ -933,9 +940,11 @@ class CustomerFormFrontlet {
 The list template can also hide controls that do not match the current user's roles:
 
 ```html
+
 <button xis:if="isUserInRole('ADMIN')"
         xis:frontlet="CustomerFormFrontlet"
-        xis:target-container="customer-main">Add customer</button>
+        xis:target-container="customer-main">Add customer
+</button>
 ```
 
 `isUserInRole(...)` and `isUserInRoles(...)` run in the browser. They are useful for a cleaner UI, but they are not
